@@ -14,7 +14,7 @@ Future <List<MovieModel>>  getdata()  async{
     final response = await http.get(baseurl);
     if(response.statusCode == 200){
      final List deoced = jsonDecode(response.body);
-     print(response.body);
+    // print(response.body);
      return deoced.map((e) => MovieModel.fromJson(e)).toList();
     }else{
 

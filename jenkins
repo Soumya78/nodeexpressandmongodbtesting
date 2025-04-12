@@ -1,0 +1,62 @@
+pipeline {
+    agent any  // Will use any available agent; iOS build requires macOS agent with Flutter
+
+    environment {
+        FLUTTER_CHANNEL = 'stable'
+    }
+
+    stages {
+        stage('Clone Repo') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Install Flutter SDK') {
+            steps {
+                sh 'flutter --version || git clone https://github.com/flutter/flutter.git -b $FLUTTER_CHANNEL flutter && export PATH="$PATH:`pwd`/flutter/bin"'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh 'flutter pub get'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh 'flutter test'
+            }
+        }
+
+        stage('Build Android APK') {
+            steps {
+                sh 'flutter build apk --release'
+            }
+        }
+
+        stage('Build iOS IPA') {
+            when {
+                expression {
+                    isUnix() && fileExists('ios/Runner.xcworkspace')
+                }
+            }
+            steps {
+                sh '''
+                    cd ios
+                    pod install
+                    cd ..
+                    flutter build ipa --release --no-codesign
+                '''
+            }
+        }
+
+        stage('Archive Artifacts') {
+            steps {
+                archiveArtifacts artifacts: 'build/app/outputs/flutter-apk/app-release.apk', fingerprint: true
+                archiveArtifacts artifacts: 'build/ios/ipa/*.ipa', fingerprint: true
+            }
+        }
+    }
+}

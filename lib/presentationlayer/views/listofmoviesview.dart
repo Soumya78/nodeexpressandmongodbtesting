@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../viewmodel/provider/getdataprovider.dart';
@@ -28,6 +29,9 @@ class Listofmoviesviwew extends ConsumerWidget {
 
                       child: ListTile(
                         title: Text(_listmovie[index].name),
+                        onTap: (){
+                          context.go('/details');
+                        },
                       ));
                 });
       },
